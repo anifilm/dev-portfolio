@@ -1,0 +1,18 @@
+# Netlify Dev
+# https://cli.netlify.com/netlify-dev/#netlifytoml-dev-block
+
+# 제품 모드
+[build]
+  command = "npm run build"
+  functions = "functions" # Netlify 서버리스 함수가 작성된 디렉토리를 지정
+  publish = "build" # 프로젝트 빌드 결과의 디렉토리를 지정
+
+# 개발 모드
+[dev]
+  framework = "#custom"
+  command = "npm run dev:snowpack" # 연결할 프로젝트의 개발 서버를 실행하는 명령
+  targetPort = 5000 # 연결할 프로젝트 개발 서버의 포트
+  port = 8888 # 출력할 Netlify 서버의 포트
+  publish = "public" # 프로젝트의 정적 콘텐츠 디렉토리를 지정
+  jwtRolePath = "app_metadata.authorization.roles"
+  autoLaunch = false
