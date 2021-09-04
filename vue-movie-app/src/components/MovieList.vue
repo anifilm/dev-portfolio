@@ -20,7 +20,7 @@
           >
             <template v-slot:placeholder>
               <div
-                style="background: gray; height: 200%; color: white; line-height: 200px;text-align: center;"
+                style="background: gray; height: 100%; color: white; line-height: 300px; text-align: center;"
               >
                 no poster image
               </div>
@@ -54,7 +54,7 @@ export default {
       return poster === 'N/A' ? '' : poster;
     },
     posterHeight(poster) {
-      return poster === 'N/A' ? 200 : 300;
+      return poster === 'N/A' ? 300 : 400;
     }
   }
 };
