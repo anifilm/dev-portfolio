@@ -1,0 +1,26 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container">
+    <a class="navbar-brand" href="/">Flask Board</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto"></ul>
+      <ul class="navbar-nav">
+        {% if session.get("id") %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('member.member_logout') }}">{{ session["name"] }}님 (로그아웃)</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a  class="nav-link" href="{{ url_for('member.member_register') }}">회원 등록</a>
+        </li>
+        <li class="nav-item">
+          <a  class="nav-link" href="{{ url_for('member.member_login') }}">로그인</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

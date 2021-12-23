@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mt-5"></div>
+<table class="table" style="width: 900px">
+  <tbody>
+    <tr>
+      <td colspan="3">{{ result.title }}</td>
+    </tr>
+    <tr>
+      <td>작성자: {{ result.name }}</td>
+      <td>작성시간: {{ result.created_at|formatdatetime }}</td>
+      <td>조회수: {{ result.view }}</td>
+    </tr>
+    <tr>
+      <td colspan="3">
+        <div style="min-height: 200px">{% autoescape false %}{{ result.contents }}{% endautoescape %}</div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3">
+      {% if result.attachfile %}
+        첨부파일 : &nbsp;<a href="{{ url_for('board.board_files', filename=result.attachfile) }}">{{ result.attachfile }}</a>
+      {% endif %}
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div id="button" style="width: 900px">
+  <a href="{{ url_for('board.lists', page=page, search=search, keyword=keyword) }}" class="btn btn-secondary">목록보기</a>
+  {% if session["id"] == result.writer_id %}
+  <a href="{{ url_for('board.board_edit', idx=result.id)}}" class="btn btn-outline-primary ml-1">수정</a>
+  <a href="{{ url_for('board.board_delete', idx=result.id)}}" class="btn btn-outline-danger float-right">삭제</a>
+</div>
+  {% endif %}
+</div>
+
+<div class="mt-5">
+  <form name="commentForm" action="{{ url_for('board.comment_write') }}" method="POST" id="commentForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="board_id" value="{{ result.id }}">
+    <div id="commentArea" style="width: 900px">
+      <span style="margin-left: 12px;">댓글 목록</span>
+      <span id="commentCount"></span>
+      <table class="table" id="commentList" style="width: 900px"></table>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  $(document).ready(function () {
+    get_comment_list();
+  });
+
+  function addComment() {
+    $.ajax({
+      url: "{{ url_for('board.comment_write') }}",
+      type: 'POST',
+      data: $('#commentForm').serialize(),
+      success: function (data) {
+          $('#comment').val('');
+          get_comment_list();
+      },
+      error: function (request, status, error) {
+        let msg = 'Error: ' + request.status + '<br>' + '내용: ' + request.responseText + '<br>' + error;
+        console.log(msg);
+      }
+    });
+  }
+
+  function editComment(idx) {
+    let name = $('#t' + idx).data('name');
+    let comment = $('#t' + idx).data('comment');
+    let html = `
+<td>
+  <span style="display: inline-block; width: 70px; margin-left: 10px;"><small>${name}</small></span>
+  <textarea name="comment" id="i${idx}" cols="88" rows="3" placeholder="댓글을 입력하세요." style="padding: 5px">${comment}</textarea>
+</td>
+<td class="text-center">
+  <small><a href="#" onclick="editCommentOk('${idx}')">완료</a></small><span style="color: #808080">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+  <small><a href="#" onclick="cancelEdit('${idx}')" class="text-danger">취소</a></small>
+</td>`;
+    $('#t' + idx).html(html);
+  }
+
+  function cancelEdit(idx) {
+    let name = $('#t' + idx).data('name');
+    let comment = $('#t' + idx).data('comment');
+    let created_at = $('#t' + idx).data('date');
+    let html = `
+<td>
+  <span style="display: inline-block; width: 80px; margin-left: 10px;"><small>${name}</small></span>
+  <span><small>${comment}</small></span>
+  <span class="float-right"><small>${created_at}</small></span>
+</td>
+<td class="text-center">
+  <small><a href="#" onclick="editComment('${idx}')">수정</a></small><span style="color: #808080">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+  <small><a href="#" onclick="deleteComment('${idx}')" class="text-danger">삭제</a></small>
+</td>`;
+    $('#t' + idx).html(html);
+  }
+
+  function editCommentOk(idx) {
+    let comment = $('#i' + idx).val();
+    console.log(comment);
+    let data = {
+      "id": idx,
+      "csrf_token": "{{ csrf_token() }}",
+      "comment": comment,
+    }
+    $.ajax({
+      url: "{{ url_for('board.comment_edit') }}",
+      type: 'POST',
+      cache: false,
+      data: data,
+      success: function (data) {
+        get_comment_list();
+      },
+      error: function (request, status, error) {
+        let msg = 'Error: ' + request.status + '<br>' + '내용: ' + request.responseText + '<br>' + error;
+        console.log(msg);
+      }
+    });
+  }
+
+  function deleteComment(idx) {
+    var data = {
+      'id': idx,
+      'csrf_token': '{{ csrf_token() }}'
+    }
+    $.ajax({
+        url: "{{ url_for('board.comment_delete') }}",
+        type: 'POST',
+        cache: false,
+        data: data,
+        success: function (data) {
+          if (data['error'] == 'success') {
+            get_comment_list();
+            alert('댓글이 삭제 되었습니다.');
+          }
+        },
+        error: function (request, status, error) {
+          let msg = 'Error: ' + request.status + '<br>' + '내용: ' + request.responseText + '<br>' + error;
+          console.log(msg);
+        }
+    });
+  }
+
+  function get_comment_list() {
+    $.ajax({
+      url: "{{ url_for('board.comment_list', board_id=result.id) }}",
+      type: 'GET',
+      cache: false,
+      dataType: 'json',
+      success: function (data) {
+        let c = data.comment_lists;
+        let html_count = '';
+        let html_comment = '';
+        if (c.length > 0) {
+          html_count += `&nbsp;${c.length}`;
+          for (let i = 0; i < c.length; i++) {
+            html_comment += `
+<tr id="t${c[i].id}" data-name="${c[i].name}" data-comment="${c[i].comment}" data-date="${c[i].created_at}">
+  <td>
+    <span style="display: inline-block; width: 80px; margin-left: 10px;"><small>${c[i].name}</small></span>
+    <span><small>${c[i].comment}</small></span>
+    <span class="float-right"><small>${c[i].created_at}</small></span>
+  </td>
+  <td class="text-center">`;
+
+              if (c[i].owner) {
+                html_comment += `
+    <small><a href="#" onclick="editComment('${c[i].id}')">수정</a></small><span style="color: #808080">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <small><a href="#" onclick="deleteComment('${c[i].id}')" class="text-danger">삭제</a></small>`;
+              }
+              html_comment += `
+  </td>
+</tr>`;
+          }
+        }
+        html_comment += `
+<tr>
+  <td>
+    <textarea name="comment" id="comment" cols="100" rows="4" placeholder="댓글을 입력하세요." style="padding: 5px"></textarea>
+  </td>
+  <td>
+    <a href="#" onClick="addComment()" class="btn btn-outline-primary" style="height: 90px; margin-top: 8px;">댓글등록</a>
+  </td>
+</tr>
+        `;
+        $('#commentCount').html(html_count);
+        $('#commentList').html(html_comment);
+      },
+      error: function (request, status, error) {
+        let msg = 'Error: ' + request.status + '<br>' + '내용: ' + request.responseText + '<br>' + error;
+        console.log(msg);
+      }
+    });
+  }
+</script>
+{% endblock %}

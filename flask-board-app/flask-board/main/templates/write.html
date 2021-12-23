@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" id="write" style="width: 900px">
+  <div class="card-body">
+    <h5 class="card-title mr-4 text-center">새로운 글 작성</h5>
+    <form name="form" action="{{ url_for('board.board_write') }}" method="POST" onsubmit="return checkForm()" enctype="multipart/form-data" class="mt-4 mr-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group row">
+        <label for="name" class="col-sm-2 col-form-label text-right">작성자</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="name" id="name" value="{{ session['name'] }}" readonly>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="title" class="col-sm-2 col-form-label text-right">제목</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="title" id="title" placeholder="제목을 입력하세요." required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="summernote" class="col-sm-2 col-form-label text-right">내용</label>
+        <div class="col-sm-10">
+          <textarea class="form-control" name="contents" id="summernote" required></textarea>
+        </div>
+      </div>
+      <div class="input-group row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10 custom-file">
+          <input type="file" class="custom-file-input" id="customFile" name="attachfile">
+          <label class="custom-file-label" for="customFile" style="width: 688px; margin-left: 20px;">첨부파일</label>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <a href="{{ url_for('board.lists') }}" class="btn btn-secondary">취소</a>
+        <input type="submit" value="작성완료" class="btn btn-primary">
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  function checkForm() {
+    if ($.trim($('#title').val()) == '') {
+      alert('제목을 입력하세요.')
+      $('#title').focus();
+      return false;
+    }
+
+    if ($.trim($('#summernote').val()) == '') {
+      alert('내용을 입력하세요.')
+      $('#summernote').focus();
+      return false;
+    }
+
+    return true;
+  }
+</script>
+{% endblock %}

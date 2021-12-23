@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Flask board - Register{% endblock %}
+
+{% block content %}
+<div class="card" id="register" style="width: 600px">
+  <div class="card-body">
+    <h5 class="card-title mr-4 text-center">회원 등록</h5>
+    <form name="form" action="{{ url_for('member.member_register') }}" method="POST" onsubmit="return checkForm()" class="mt-4 mr-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if next_url %}
+      <input type="hidden" name="next_url" value="{{ next_url }}">
+      {% endif %}
+      <div class="form-group row">
+        <label for="email" class="col-sm-3 col-form-label text-right">이메일</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="email" name="email" id="email" placeholder="이메일을 입력하세요." required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="name" class="col-sm-3 col-form-label text-right">사용자명</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="name" name="name" id="name" placeholder="사용자명을 입력하세요." required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="password" class="col-sm-3 col-form-label text-right">비밀번호</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="password" name="password" id="password" placeholder="비밀번호를 입력하세요." required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="password_re" class="col-sm-3 col-form-label text-right">비밀번호 확인</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="password" name="password_re" id="password_re" placeholder="비밀번호 확인을 입력하세요." required>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <a href="{{ url_for('board.lists') }}" class="btn btn-secondary">취소</a>
+        <input type="submit" value="회원등록" class="btn btn-primary">
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  function checkForm() {
+    if ($.trim($('#email').val()) == '') {
+      alert('이메일을 입력하세요.')
+      $('#email').focus();
+      return false;
+    }
+
+    if (!validateEmail($.trim($('#email').val()))) {
+      alert('이메일 유효성이 올바르지 않습니다.');
+      $('#email').focus();
+      return false;
+    }
+
+    if ($.trim($('#name').val()) == '') {
+      alert('사용자명을 입력하세요.')
+      $('#name').focus();
+      return false;
+    }
+
+    if ($.trim($('#password').val()) == '') {
+      alert('비밀번호를 입력하세요.')
+      $('#password').focus();
+      return false;
+    }
+
+    if ($.trim($('#password_re').val()) == '') {
+      alert('비밀번호 확인을 입력하세요.')
+      $('#password_re').focus();
+      return false;
+    }
+
+    if ($.trim($('#password').val()) != $.trim($('#password_re').val())) {
+      alert('비밀번호가 일치하지 않습니다.')
+      $('#password_re').focus();
+      return false;
+    }
+
+    return true;
+  }
+</script>
+{% endblock %}
