@@ -24,7 +24,7 @@ pyflakes==2.3.1
 pymongo==3.12.0
 python-dotenv==0.19.2
 regex==2021.9.30
-requests==2.26.0
+requests==2.31.0
 soupsieve==2.3.1
 tomli==1.2.1
 typing-extensions==3.10.0.2
